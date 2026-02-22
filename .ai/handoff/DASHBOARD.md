@@ -1,23 +1,30 @@
 # openclaw-rss-feeds — Dashboard
 
-> Phase: P0 (initialized, core logic in bash available)
+> Phase: P2 ✅ (architecture done, ready for P3 implementation)
+
+## Pipeline Status
+
+| Phase | Agent  | Status   |
+| ----- | ------ | -------- |
+| P1    | Sonar  | ✅ Done  |
+| P2    | Opus   | ✅ Done  |
+| P3    | Sonnet | ⏳ Next  |
+| P4    | All    | ⏳ Todo  |
 
 ## Plugin Structure
 
-| File                   | Status   |
-| ---------------------- | -------- |
-| README.md              | ✅ Done  |
-| package.json           | ⏳ Todo  |
-| tsconfig.json          | ⏳ Todo  |
-| openclaw.plugin.json   | ⏳ Todo  |
-| src/index.ts           | ⏳ Todo  |
-| src/fetcher.ts         | ⏳ Todo  |
-| src/cveFetcher.ts      | ⏳ Todo  |
-| src/formatter.ts       | ⏳ Todo  |
-| src/ghostPublisher.ts  | ⏳ Todo  |
-| tests/                 | ⏳ Todo  |
-
-## Reference Implementation
-
-- `~/.openclaw/workspace/cron/scripts/fortinet-monthly-digest.sh`
-- Contains: NVD fetch, RSS parse, HTML format, Ghost draft, WhatsApp notify
+| File                    | Status   |
+| ----------------------- | -------- |
+| README.md               | ✅ Done  |
+| package.json            | ✅ Done  |
+| tsconfig.json           | ✅ Done  |
+| openclaw.plugin.json    | ✅ Done  |
+| ADR.md                  | ✅ Done  |
+| src/index.ts            | ✅ Stub  |
+| src/types.ts            | ⏳ P3    |
+| src/fetcher.ts          | ⏳ P3    |
+| src/cveFetcher.ts       | ⏳ P3    |
+| src/formatter.ts        | ⏳ P3    |
+| src/ghostPublisher.ts   | ⏳ P3    |
+| src/notifier.ts         | ⏳ P3    |
+| tests/*                 | ⏳ P3    |

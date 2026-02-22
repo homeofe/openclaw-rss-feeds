@@ -1,5 +1,20 @@
 # openclaw-rss-feeds — Log
 
+## 2026-02-22 — P2 Architecture Decision (Opus)
+
+- **ADR-001** written: 6 architecture decisions documented
+- D1: Pure TypeScript (no Python subprocess)
+- D2: node-cron in registerService + manual tool (rss_run_digest)
+- D3: Notification via openclaw CLI subprocess
+- D4: CVE enrichment optional per-feed (enrichCve flag)
+- D5: Sequential feed execution (NVD rate limit safety)
+- D6: Final config schema: feeds[], schedule, lookbackDays, ghost{url,adminKey}, notify[], nvdApiKey?
+- Config schema finalized in openclaw.plugin.json with uiHints for sensitive fields
+- Dependencies: rss-parser + jsonwebtoken + node-cron (+ @types)
+- Switched test runner from jest to vitest (faster, native ESM/TS)
+- Module structure: 6 source files + types.ts
+- Error strategy: per-feed isolation, non-fatal CVE/notification failures, structured logging
+
 ## 2026-02-22 — Project Initialized
 
 - Repo cloned from github.com/homeofe/openclaw-rss-feeds
