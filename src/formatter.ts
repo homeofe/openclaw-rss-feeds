@@ -31,13 +31,20 @@ function formatDate(d: Date): string {
   return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
 }
 
-// Format CVE description: highlight product names and break on "allows attacker"
-function formatCveDescription(desc: string): string {
-  // Highlight Forti* product names
-  let result = desc.replace(
-    /\b(Forti(?!net)[a-zA-Z0-9]+(?:\s+Cloud)?)\b/g,
-    '<strong>$1</strong>'
-  );
+// Format CVE description: optionally highlight product names and break on "allows attacker"
+function formatCveDescription(desc: string, productHighlightPattern?: string): string {
+  let result = desc;
+
+  // Highlight product names if a pattern is configured
+  if (productHighlightPattern) {
+    try {
+      const re = new RegExp(`\\b(${productHighlightPattern})\\b`, 'g');
+      result = result.replace(re, '<strong>$1</strong>');
+    } catch {
+      // Invalid regex — skip highlighting
+    }
+  }
+
   // Break before "allows ... attacker"
   result = result.replace(
     /\s+(allows\s+(?:an?\s+)?(?:remote\s+)?attacker)/gi,
@@ -77,17 +84,17 @@ function buildFirmwareSection(firmware: FirmwareEntry[], feedName: string): stri
       const typeColor =
         fw.type === 'Major' ? '#1565c0' : fw.type === 'Feature' ? '#2e7d32' : '#e65100';
 
+      const docsCell = fw.docsUrl
+        ? `<a href="${escapeHtml(fw.docsUrl)}" target="_blank" style="color:#1976d2;text-decoration:none;">Documentation</a>`
+        : `<span style="color:#aaa;">—</span>`;
+
       return `<tr style="border-bottom:1px solid #eee;">
   <td style="padding:8px;vertical-align:middle;"><strong>${escapeHtml(fw.product)}</strong></td>
   <td style="padding:8px;vertical-align:middle;font-family:monospace;">${escapeHtml(fw.version)}</td>
   <td style="padding:8px;vertical-align:middle;text-align:center;">
     <span style="background:${typeBg};color:${typeColor};padding:2px 8px;border-radius:4px;font-size:0.85em;font-weight:bold;">${fw.type}</span>
   </td>
-  <td style="padding:8px;vertical-align:middle;">
-    <a href="${escapeHtml(fw.releaseNotesUrl)}" target="_blank" style="color:#1976d2;text-decoration:none;">Release Notes</a>
-    &nbsp;|&nbsp;
-    <a href="${escapeHtml(fw.adminGuideUrl)}" target="_blank" style="color:#1976d2;text-decoration:none;">Admin Guide</a>
-  </td>
+  <td style="padding:8px;vertical-align:middle;">${docsCell}</td>
 </tr>`;
     })
     .join('\n');
@@ -107,7 +114,7 @@ ${rows}
 </table>`;
 }
 
-function buildCveSection(cves: CveEntry[], cvssThreshold: number): string {
+function buildCveSection(cves: CveEntry[], cvssThreshold: number, productHighlightPattern?: string): string {
   if (cves.length === 0) {
     return `<p style="color:#666;font-style:italic;">No CVEs above the CVSS threshold (${cvssThreshold}) for this period.</p>`;
   }
@@ -125,7 +132,7 @@ function buildCveSection(cves: CveEntry[], cvssThreshold: number): string {
   <td style="padding:8px;vertical-align:top;text-align:center;">
     <span style="background:${scoreBg};color:${scoreColor};padding:2px 8px;border-radius:4px;font-weight:bold;">${score.toFixed(1)}</span>
   </td>
-  <td style="padding:8px;vertical-align:top;font-size:0.88em;line-height:1.5;">${formatCveDescription(escapeHtml(cve.description))}</td>
+  <td style="padding:8px;vertical-align:top;font-size:0.88em;line-height:1.5;">${formatCveDescription(escapeHtml(cve.description), productHighlightPattern)}</td>
 </tr>`;
     })
     .join('\n');
@@ -184,7 +191,7 @@ function buildFeedSection(feedResult: FeedResult, cvssThreshold: number): string
   <strong>⚠️ CVE Fetch Warning:</strong> ${escapeHtml(feedResult.cveError)}
 </div>`;
     }
-    section += buildCveSection(feedResult.cves, cvssThreshold);
+    section += buildCveSection(feedResult.cves, cvssThreshold, feedResult.productHighlightPattern);
   }
 
   section += `</div>`;

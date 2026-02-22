@@ -23,14 +23,11 @@ function extractProduct(title: string): string {
   return match ? match[1].toLowerCase() : 'unknown';
 }
 
-// Build documentation URLs for Fortinet products
-function buildFortinetDocs(rawProduct: string, version: string): { releaseNotesUrl: string; adminGuideUrl: string } {
-  const urlProduct = rawProduct === 'fortios' ? 'fortigate' : rawProduct;
-  const rnSlug = rawProduct === 'fortios' ? 'fortios-release-notes' : 'release-notes';
-  return {
-    releaseNotesUrl: `https://docs.fortinet.com/document/${urlProduct}/${version}/${rnSlug}`,
-    adminGuideUrl: `https://docs.fortinet.com/document/${urlProduct}/${version}/administration-guide`,
-  };
+// Build a documentation URL from a template, substituting {product} and {version}
+function buildDocsUrl(template: string, product: string, version: string): string {
+  return template
+    .replace(/\{product\}/g, product)
+    .replace(/\{version\}/g, version);
 }
 
 // Check if a title/content matches any of the configured keywords (case-insensitive)
@@ -109,24 +106,28 @@ export async function fetchFeed(
       feedName: feedConfig.name,
     };
 
-    // If the item has a version, treat it as a firmware entry
+    // If the item has a version, treat it as a firmware/release entry
     if (version) {
       const firmwareKey = `${rawProduct}-${version}`;
       if (!seenKeys.has(firmwareKey)) {
         seenKeys.add(firmwareKey);
-        const docs = buildFortinetDocs(rawProduct, version);
+
+        // Build docs URL from template if configured
+        const docsUrl = feedConfig.docsUrlTemplate
+          ? buildDocsUrl(feedConfig.docsUrlTemplate, rawProduct, version)
+          : undefined;
+
         firmware.push({
           product: rawProduct.toUpperCase(),
           version,
           type: getFirmwareType(version),
           pubDate: pubDate.toISOString(),
-          releaseNotesUrl: docs.releaseNotesUrl,
-          adminGuideUrl: docs.adminGuideUrl,
+          docsUrl,
           feedId: feedConfig.id,
           feedName: feedConfig.name,
         });
-        item.releaseNotesUrl = docs.releaseNotesUrl;
-        item.adminGuideUrl = docs.adminGuideUrl;
+
+        item.docsUrl = docsUrl;
       }
     }
 

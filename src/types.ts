@@ -8,6 +8,12 @@ export interface FeedConfig {
   enrichCve?: boolean;
   cvssThreshold?: number;
   tags?: string[];
+  /** URL template for documentation links. Use {product} and {version} as placeholders.
+   *  Example: "https://docs.example.com/{product}/{version}/release-notes" */
+  docsUrlTemplate?: string;
+  /** Optional regex string to highlight product names in CVE descriptions.
+   *  Example: "Forti(?!net)[a-zA-Z0-9]+(?:\\s+Cloud)?" */
+  productHighlightPattern?: string;
 }
 
 export interface GhostConfig {
@@ -31,20 +37,18 @@ export interface FeedItem {
   version?: string;
   product?: string;
   content?: string;
-  releaseNotesUrl?: string;
-  adminGuideUrl?: string;
+  docsUrl?: string;
   feedId: string;
   feedName: string;
 }
 
-// Subset used specifically for firmware entries (Fortinet-style)
+// Subset used for firmware/versioned release entries
 export interface FirmwareEntry {
   product: string;
   version: string;
   type: 'Major' | 'Feature' | 'Patch';
   pubDate: string; // ISO string
-  releaseNotesUrl: string;
-  adminGuideUrl: string;
+  docsUrl?: string;
   feedId: string;
   feedName: string;
 }
@@ -61,6 +65,7 @@ export interface FeedResult {
   feedId: string;
   feedName: string;
   enrichCve?: boolean;
+  productHighlightPattern?: string;
   items: FeedItem[];
   firmware: FirmwareEntry[];
   cves: CveEntry[];

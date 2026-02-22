@@ -45,6 +45,7 @@ async function runDigest(api: PluginApi): Promise<DigestResult> {
       feedId: feedConfig.id,
       feedName: feedConfig.name,
       enrichCve: feedConfig.enrichCve ?? false,
+      productHighlightPattern: feedConfig.productHighlightPattern,
       items: [],
       firmware: [],
       cves: [],
