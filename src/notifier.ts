@@ -1,5 +1,5 @@
 // @elvatis/openclaw-rss-feeds — Channel notifier via openclaw CLI subprocess
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 
 /**
  * Parse a notification target string in format "channel:target"
@@ -25,13 +25,9 @@ function parseTarget(raw: string): ParsedTarget | null {
   };
 }
 
-function shellEscape(str: string): string {
-  // Use single-quote wrapping with escaped single quotes
-  return `'${str.replace(/'/g, "'\\''")}'`;
-}
-
 /**
  * Send a notification to one or more targets via the openclaw CLI.
+ * Uses execFileSync (no shell) to prevent shell injection.
  *
  * @param targets - Array of "channel:target" strings
  * @param message - Message text to send
@@ -44,19 +40,16 @@ export async function notify(targets: string[], message: string): Promise<void> 
     if (!parsed) continue;
 
     try {
-      const cmd = [
-        'openclaw',
+      execFileSync('openclaw', [
         'message',
         'send',
         '--channel',
-        shellEscape(parsed.channel),
+        parsed.channel,
         '--to',
-        shellEscape(parsed.target),
+        parsed.target,
         '--message',
-        shellEscape(message),
-      ].join(' ');
-
-      execSync(cmd, {
+        message,
+      ], {
         timeout: 30000,
         stdio: 'pipe',
       });

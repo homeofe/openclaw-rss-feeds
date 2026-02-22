@@ -113,25 +113,30 @@ async function runDigest(api: PluginApi): Promise<DigestResult> {
   if (config.ghost) {
     api.logger.info(`[rss-feeds] Publishing draft to Ghost: ${config.ghost.url}`);
 
-    // Collect all tags from all feed configs
-    const allTags = Array.from(
-      new Set(config.feeds.flatMap(f => f.tags ?? []))
-    ).map(name => ({ name }));
+    try {
+      // Collect all tags from all feed configs
+      const allTags = Array.from(
+        new Set(config.feeds.flatMap(f => f.tags ?? []))
+      ).map(name => ({ name }));
 
-    const result = await publishDraft(
-      config.ghost,
-      title,
-      html,
-      allTags,
-      `Monthly security digest for ${period}.`
-    );
+      const result = await publishDraft(
+        config.ghost,
+        title,
+        html,
+        allTags,
+        `Monthly security digest for ${period}.`
+      );
 
-    if (result.success) {
-      ghostUrl = result.postUrl;
-      api.logger.info(`[rss-feeds] Ghost draft created: ${ghostUrl}`);
-    } else {
-      ghostError = result.error;
-      api.logger.error(`[rss-feeds] Ghost publish failed: ${ghostError}`);
+      if (result.success) {
+        ghostUrl = result.postUrl;
+        api.logger.info(`[rss-feeds] Ghost draft created: ${ghostUrl}`);
+      } else {
+        ghostError = result.error;
+        api.logger.error(`[rss-feeds] Ghost publish failed: ${ghostError}`);
+      }
+    } catch (err) {
+      ghostError = err instanceof Error ? err.message : String(err);
+      api.logger.error(`[rss-feeds] Ghost publish crashed: ${ghostError}`);
     }
   } else {
     api.logger.info('[rss-feeds] No Ghost config — skipping draft creation');
