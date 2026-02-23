@@ -1,24 +1,20 @@
-# @elvatis_com/openclaw-rss-feeds
+# @elvatis/openclaw-rss-feeds
 
-OpenClaw plugin for automated RSS/Atom feed digests with CVE enrichment and Ghost CMS integration.
-
-## Features
-
-- **Feed Management** - Add, remove, and list RSS/Atom feeds via agent tools
-- **Scheduled Digests** - Cron-based fetching with configurable intervals
-- **CVE Enrichment** - Automatically cross-references security feeds with NVD/CISA KEV data
-- **Ghost CMS Drafts** - Generates formatted blog post drafts in Ghost
-- **Smart Filtering** - Keyword and severity-based filtering to reduce noise
+OpenClaw plugin for RSS and Atom security digests with optional NVD CVE enrichment, Ghost CMS draft publishing, and channel notifications.
 
 ## Installation
 
 ```bash
-npm install @elvatis_com/openclaw-rss-feeds
+npm install @elvatis/openclaw-rss-feeds
 ```
+
+Then enable the plugin in your OpenClaw plugin config.
 
 ## Configuration
 
-Add to your `openclaw.json`:
+The plugin schema is defined in `openclaw.plugin.json`.
+
+Example with all supported options:
 
 ```json
 {
@@ -26,50 +22,123 @@ Add to your `openclaw.json`:
     "openclaw-rss-feeds": {
       "feeds": [
         {
-          "url": "https://www.cert-bund.de/rss20neu",
-          "label": "CERT-Bund",
-          "category": "security"
+          "id": "fortinet",
+          "name": "Fortinet PSIRT",
+          "url": "https://www.fortiguard.com/rss/ir.xml",
+          "keywords": ["fortinet", "fortigate", "fortios"],
+          "enrichCve": true,
+          "cvssThreshold": 7,
+          "tags": ["fortinet", "security", "digest"],
+          "docsUrlTemplate": "https://docs.fortinet.com/product/{product}/{version}/release-notes",
+          "productHighlightPattern": "Forti(?:Gate|OS|Analyzer|Manager|Client|Proxy)"
+        },
+        {
+          "id": "m365",
+          "name": "Microsoft 365 Message Center",
+          "url": "https://www.microsoft.com/en-us/microsoft-365/roadmap?filters=&searchterms=&rss=1",
+          "keywords": ["security", "vulnerability", "defender"],
+          "enrichCve": true,
+          "cvssThreshold": 6.5,
+          "tags": ["microsoft-365", "security"]
+        },
+        {
+          "id": "bsi",
+          "name": "BSI CERT-Bund",
+          "url": "https://wid.cert-bund.de/portal/wid/securityadvisory?rss",
+          "keywords": ["kritisch", "critical", "cve"],
+          "enrichCve": false,
+          "tags": ["bsi", "cert-bund"]
+        },
+        {
+          "id": "heise-security",
+          "name": "Heise Security",
+          "url": "https://www.heise.de/security/rss/news-atom.xml",
+          "keywords": ["cve", "security", "ransomware"],
+          "enrichCve": false,
+          "tags": ["heise", "security-news"]
         }
       ],
       "schedule": "0 9 1 * *",
+      "lookbackDays": 31,
       "ghost": {
-        "url": "https://your-blog.com",
-        "adminApiKey": "your-key"
+        "url": "https://blog.example.com",
+        "adminKey": "<ghost-admin-key-id>:<ghost-admin-key-secret-hex>"
       },
-      "enrichCve": true,
-      "keywords": ["critical", "zero-day", "ransomware"]
+      "notify": [
+        "whatsapp:<phone>",
+        "telegram:123456789"
+      ],
+      "nvdApiKey": "<nvd-api-key-optional>"
     }
   }
 }
 ```
 
-## Agent Tools
+## Usage
 
-| Tool | Description |
-|---|---|
-| `rss_list_feeds` | List all configured feeds |
-| `rss_add_feed` | Add a new RSS/Atom feed |
-| `rss_remove_feed` | Remove a feed by label or URL |
-| `rss_fetch_now` | Trigger an immediate fetch for one or all feeds |
-| `rss_digest` | Generate a digest from recent entries |
-| `rss_search` | Search feed entries by keyword |
+### Automatic run via cron schedule
 
-## How It Works
+If `schedule` is set, the plugin registers a scheduler and runs automatically.
 
-1. Feeds are fetched on schedule (or on-demand via agent tool)
-2. New entries are filtered by keywords and deduplication
-3. Security feeds get CVE enrichment (CVSS scores, CISA KEV status)
-4. A formatted digest is generated (Markdown or Ghost draft)
-5. Agent is notified with a summary
+Example:
+
+- `0 9 1 * *` runs at 09:00 on day 1 of every month
+- `0 8 * * 1` runs every Monday at 08:00
+
+### Manual run via tool
+
+You can trigger digest generation manually with the registered tool:
+
+- Tool name: `rss_run_digest`
+- Optional parameter: `dryRun: true`
+
+`dryRun` fetches and formats the digest but skips Ghost publishing and notifications.
+
+## CVE Enrichment
+
+If a feed has `enrichCve: true`, the plugin calls the NVD CVE API and enriches the digest with:
+
+- CVE ID
+- CVSS score (filtered by `cvssThreshold`)
+- CVE description
+- Link to NVD details
+
+Notes:
+
+- CVE enrichment is keyword-driven via each feed's `keywords`
+- Requests are rate-limited between keyword lookups
+- NVD failures are handled as non-fatal, feed processing continues
+
+## Ghost CMS Integration
+
+If `ghost` is configured, the digest is published as a draft post through the Ghost Admin API.
+
+Implementation details:
+
+- HS256 JWT is generated from `adminKey` (`id:secret` format)
+- API endpoint: `/ghost/api/admin/posts/?source=html`
+- Digest is sent as HTML body
+- Tags are merged from all configured feed `tags`
+
+If Ghost fails, digest generation still succeeds and the error is reported in result metadata and optional notifications.
+
+## Notifications
+
+If `notify` contains targets (format `channel:target`), a summary notification is sent after the run.
+
+Example targets:
+
+- `whatsapp:<phone>`
+- `telegram:123456789`
+- `discord:#security`
 
 ## Development
 
 ```bash
-git clone https://github.com/homeofe/openclaw-rss-feeds
-cd openclaw-rss-feeds
 npm install
+npx tsc --noEmit
+npm test
 npm run build
-npm run test
 ```
 
 ## License

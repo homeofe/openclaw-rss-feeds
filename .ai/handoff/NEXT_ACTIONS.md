@@ -1,33 +1,23 @@
 # openclaw-rss-feeds — Next Actions
 
-> Prioritized by strategic importance. Top = do first.
+## Current State
 
-## P1 — Research (Sonar) ✅ DONE
-- [x] Research: rss-parser npm package
-- [x] Research: NVD CVE API v2.0 usage from TypeScript
-- [x] Research: Ghost Admin API JWT from Node.js
-- [x] Research: openclaw plugin scheduling API
+P4 implementation work is complete in repository (`main`) and pushed.
 
-## P2 — Architecture (Opus) ✅ DONE
-- [x] ADR written: ADR-001 in `.ai/handoff/ADR.md`
-- [x] Final config schema defined (feeds[], schedule, ghost, notify[], nvdApiKey?)
-- [x] Dependencies finalized: rss-parser + jsonwebtoken + node-cron
-- [x] Module structure defined (6 modules + types)
-- [x] Error handling strategy documented
+## Remaining Steps
 
-## P3 — Implementation (Sonnet) ✅ DONE — 2026-02-22
-- [x] `src/types.ts` — Define interfaces: FeedConfig, CveEntry, FeedItem, DigestResult, PluginConfig
-- [x] `src/fetcher.ts` — RSS fetch + parse with rss-parser, date filtering (lookbackDays), keyword filtering, dedup by link
-- [x] `src/cveFetcher.ts` — NVD API v2.0 fetch, CVSS filtering (cvssThreshold), vendor CPE matching, 6s sleep between requests, optional apiKey header
-- [x] `src/formatter.ts` — HTML digest builder: CVE severity table + feed items list, per-feed sections, summary header with date range
-- [x] `src/ghostPublisher.ts` — JWT generation (HS256, id:secret split, 5min expiry, aud=/admin/), POST /ghost/api/admin/posts/?source=html
-- [x] `src/notifier.ts` — Parse "channel:target" format, exec `openclaw message send --channel X --target Y --message Z`
-- [x] `src/index.ts` — Plugin entry: registerService (node-cron if schedule set), registerTool "rss_run_digest" (manual trigger), wire all modules
-- [x] `npm install` + `npx tsc --noEmit` — 0 errors (strict mode)
-- [ ] Tests: fetcher (mock RSS XML), cveFetcher (mock NVD response), formatter (snapshot HTML output), ghostPublisher (mock JWT + fetch) — deferred to P4
+1. **Manual release prep**
+   - Bump version if needed
+   - Run final `npm pack` sanity check
 
-## P4 — Review + Docs + Publish
-- [ ] Discussion round (Opus reviews architecture compliance, ChatGPT second opinion)
-- [ ] Update README.md with final config examples
-- [ ] npm publish @elvatis/openclaw-rss-feeds
-- [ ] Submit to OpenClaw community plugins
+2. **Manual publish (human-triggered)**
+   - `npm publish` for `@elvatis/openclaw-rss-feeds`
+   - Not executed by agent on purpose
+
+3. **Community submission**
+   - Submit plugin to OpenClaw community catalog
+   - Include README and config example from repository
+
+4. **Optional hardening follow-up**
+   - Add retry/backoff option for RSS fetches
+   - Add integration test for full `rss_run_digest` flow with mocked dependencies

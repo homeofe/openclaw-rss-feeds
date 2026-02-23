@@ -45,7 +45,7 @@ export async function notify(targets: string[], message: string): Promise<void> 
         'send',
         '--channel',
         parsed.channel,
-        '--to',
+        '--target',
         parsed.target,
         '--message',
         message,

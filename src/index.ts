@@ -29,6 +29,7 @@ function resolveDateRange(config: PluginConfig): { startDate: Date; endDate: Dat
 // Main digest runner
 async function runDigest(api: PluginApi): Promise<DigestResult> {
   const config = api.config;
+  const feeds = Array.isArray(config.feeds) ? config.feeds : [];
   const { startDate, endDate } = resolveDateRange(config);
 
   api.logger.info(
@@ -38,7 +39,7 @@ async function runDigest(api: PluginApi): Promise<DigestResult> {
   const feedResults: FeedResult[] = [];
 
   // Process each feed sequentially (NVD rate limits require sequential CVE fetches)
-  for (const feedConfig of config.feeds) {
+  for (const feedConfig of feeds) {
     api.logger.info(`[rss-feeds] Fetching feed: ${feedConfig.name} (${feedConfig.url})`);
 
     const feedResult: FeedResult = {
@@ -104,8 +105,9 @@ async function runDigest(api: PluginApi): Promise<DigestResult> {
     'July', 'August', 'September', 'October', 'November', 'December',
   ];
   const period = `${months[startDate.getMonth()]} ${startDate.getFullYear()}`;
-  const feedNames = config.feeds.map(f => f.name).join(' & ');
-  const title = `🛡️ ${feedNames} — Security & Firmware Digest | ${period}`;
+  const feedNames = feeds.map(f => f.name).join(' & ');
+  const titlePrefix = feedNames || 'Configured Feeds';
+  const title = `🛡️ ${titlePrefix} — Security & Firmware Digest | ${period}`;
 
   let ghostUrl: string | undefined;
   let ghostError: string | undefined;
@@ -117,7 +119,7 @@ async function runDigest(api: PluginApi): Promise<DigestResult> {
     try {
       // Collect all tags from all feed configs
       const allTags = Array.from(
-        new Set(config.feeds.flatMap(f => f.tags ?? []))
+        new Set(feeds.flatMap(f => f.tags ?? []))
       ).map(name => ({ name }));
 
       const result = await publishDraft(
@@ -190,6 +192,11 @@ async function runDigest(api: PluginApi): Promise<DigestResult> {
 // Plugin entry point
 export default function (api: PluginApi): void {
   const config = api.config;
+  const feeds = Array.isArray(config.feeds) ? config.feeds : [];
+
+  if (feeds.length === 0) {
+    api.logger.warn('[rss-feeds] No feeds configured. The digest will run but produce empty output.');
+  }
 
   // Register scheduled service (if cron schedule is configured)
   if (config.schedule && config.schedule.trim() !== '') {
@@ -283,7 +290,7 @@ export default function (api: PluginApi): void {
   });
 
   api.logger.info(
-    `[rss-feeds] Plugin loaded. Feeds: ${config.feeds.length}. ` +
+    `[rss-feeds] Plugin loaded. Feeds: ${feeds.length}. ` +
     `Schedule: ${config.schedule || 'none (manual only)'}.`
   );
 }
