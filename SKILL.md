@@ -1,3 +1,8 @@
+---
+name: openclaw-rss-feeds
+description: "RSS/Atom feed digest with optional CVE enrichment, Ghost CMS drafts, and channel notifications"
+---
+
 # @elvatis_com/openclaw-rss-feeds
 
 OpenClaw plugin for RSS and Atom security digests with optional NVD CVE enrichment, Ghost CMS draft publishing, and channel notifications.
