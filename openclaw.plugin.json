@@ -2,7 +2,7 @@
   "id": "openclaw-rss-feeds",
   "name": "RSS Feeds",
   "description": "RSS/Atom feed digest with optional CVE enrichment, Ghost CMS drafts, and channel notifications",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "configSchema": {
     "type": "object",
     "additionalProperties": false,
