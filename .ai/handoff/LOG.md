@@ -1,4 +1,4 @@
-# openclaw-rss-feeds - Log
+﻿# openclaw-rss-feeds - Log
 
 ## 2026-02-23 - P4 Finalization (Subagent)
 
@@ -95,7 +95,7 @@ npx tsc --noEmit → 0 errors (strict mode)
 
 ## 2026-02-22 - Project Initialized
 
-- Repo cloned from github.com/homeofe/openclaw-rss-feeds
+- Repo cloned from github.com/elvatis/openclaw-rss-feeds
 - AAHP handoff structure created
 - README.md written with architecture + config schema
 - Context: Fortinet monthly digest was originally built in n8n, replaced by bash+Python cron script. Now generalizing as an OpenClaw plugin for any RSS feed + CVE enrichment. n8n has been shut down.

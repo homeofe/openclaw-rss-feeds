@@ -1,4 +1,4 @@
-# openclaw-rss-feeds - Status
+﻿# openclaw-rss-feeds - Status
 
 > Last updated: 2026-02-23
 > Phase: P4 complete (Review + Docs + Push)
@@ -6,7 +6,7 @@
 ## Project Overview
 
 **Package:** `@elvatis/openclaw-rss-feeds`  
-**Repo:** https://github.com/homeofe/openclaw-rss-feeds  
+**Repo:** https://github.com/elvatis/openclaw-rss-feeds  
 **Purpose:** RSS/Atom digest plugin with optional NVD CVE enrichment, Ghost draft publishing, and channel notifications.
 
 ## Build Health

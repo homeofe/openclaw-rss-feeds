@@ -1,4 +1,4 @@
-# OpenClaw Community Catalog Entry
+﻿# OpenClaw Community Catalog Entry
 # https://github.com/openclaw/community-catalog
 #
 # To submit: copy this file into a PR against the community-catalog repo,
@@ -13,7 +13,7 @@ description: >
   Ghost CMS draft publishing, and channel notifications.
 author: Elvatis
 license: MIT
-repository: https://github.com/homeofe/openclaw-rss-feeds
+repository: https://github.com/elvatis/openclaw-rss-feeds
 npm: "@elvatis_com/openclaw-rss-feeds"
 keywords:
   - rss
