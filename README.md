@@ -2,19 +2,38 @@
 
 OpenClaw plugin for RSS and Atom security digests with optional NVD CVE enrichment, Ghost CMS draft publishing, and channel notifications.
 
-## Installation
+## Quick Start
 
 ```bash
 npm install @elvatis_com/openclaw-rss-feeds
 ```
 
-Then enable the plugin in your OpenClaw plugin config.
+Minimal config - add to your OpenClaw plugin config:
+
+```json
+{
+  "plugins": {
+    "openclaw-rss-feeds": {
+      "feeds": [
+        {
+          "id": "cert-bund",
+          "name": "BSI CERT-Bund",
+          "url": "https://wid.cert-bund.de/portal/wid/securityadvisory?rss",
+          "keywords": ["critical", "cve"]
+        }
+      ]
+    }
+  }
+}
+```
+
+See [`examples/minimal-config.json`](examples/minimal-config.json) for the minimal setup and [`examples/full-config.json`](examples/full-config.json) for all options.
 
 ## Configuration
 
 The plugin schema is defined in `openclaw.plugin.json`.
 
-Example with all supported options:
+Full example with all supported options:
 
 ```json
 {
@@ -150,6 +169,16 @@ Example targets:
 - `whatsapp:<phone>`
 - `telegram:123456789`
 - `discord:#security`
+
+## Community Catalog
+
+This plugin is listed in the [OpenClaw Community Catalog](https://github.com/openclaw/community-catalog). The catalog entry is defined in [`catalog.yaml`](catalog.yaml).
+
+To register via the CLI:
+
+```bash
+openclaw catalog submit --from ./catalog.yaml
+```
 
 ## Development
 
