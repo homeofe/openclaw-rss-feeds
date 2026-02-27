@@ -68,7 +68,12 @@ Example with all supported options:
         "whatsapp:<phone>",
         "telegram:123456789"
       ],
-      "nvdApiKey": "<nvd-api-key-optional>"
+      "nvdApiKey": "<nvd-api-key-optional>",
+      "retry": {
+        "maxRetries": 3,
+        "initialDelayMs": 1000,
+        "backoffMultiplier": 2
+      }
     }
   }
 }
@@ -93,6 +98,20 @@ You can trigger digest generation manually with the registered tool:
 - Optional parameter: `dryRun: true`
 
 `dryRun` fetches and formats the digest but skips Ghost publishing and notifications.
+
+## Retry / Backoff
+
+Feed fetches use exponential backoff by default. If a feed request fails (network error, timeout, etc.), the plugin retries with increasing delays before giving up.
+
+Default behavior (no config needed):
+
+| Setting | Default | Description |
+|---|---|---|
+| `maxRetries` | 3 | Maximum retry attempts per feed |
+| `initialDelayMs` | 1000 | Delay before the first retry (ms) |
+| `backoffMultiplier` | 2 | Multiplier applied to the delay after each retry |
+
+With the defaults, the retry delays are: 1s, 2s, 4s (then fail). Set `maxRetries` to 0 to disable retries entirely.
 
 ## CVE Enrichment
 

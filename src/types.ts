@@ -16,6 +16,12 @@ export interface FeedConfig {
   productHighlightPattern?: string;
 }
 
+export interface RetryConfig {
+  maxRetries?: number; // default 3
+  initialDelayMs?: number; // default 1000
+  backoffMultiplier?: number; // default 2
+}
+
 export interface GhostConfig {
   url: string;
   adminKey: string; // format: "id:secret" (hex secret)
@@ -28,6 +34,7 @@ export interface PluginConfig {
   ghost?: GhostConfig;
   notify?: string[]; // format: "channel:target", e.g. "whatsapp:+49..."
   nvdApiKey?: string;
+  retry?: RetryConfig;
 }
 
 export interface FeedItem {

@@ -1,6 +1,6 @@
 // @elvatis/openclaw-rss-feeds - RSS/Atom feed fetcher
 import Parser from 'rss-parser';
-import type { FeedConfig, FeedItem, FirmwareEntry } from './types';
+import type { FeedConfig, FeedItem, FirmwareEntry, RetryConfig } from './types';
 
 // Determine firmware release type from version string
 function getFirmwareType(version: string): 'Major' | 'Feature' | 'Patch' {
@@ -37,6 +37,45 @@ function matchesKeywords(text: string, keywords?: string[]): boolean {
   return keywords.some(kw => lower.includes(kw.toLowerCase()));
 }
 
+// Default retry settings
+const RETRY_DEFAULTS: Required<RetryConfig> = {
+  maxRetries: 3,
+  initialDelayMs: 1000,
+  backoffMultiplier: 2,
+};
+
+function resolveRetryConfig(retry?: RetryConfig): Required<RetryConfig> {
+  if (!retry) return RETRY_DEFAULTS;
+  return {
+    maxRetries: retry.maxRetries ?? RETRY_DEFAULTS.maxRetries,
+    initialDelayMs: retry.initialDelayMs ?? RETRY_DEFAULTS.initialDelayMs,
+    backoffMultiplier: retry.backoffMultiplier ?? RETRY_DEFAULTS.backoffMultiplier,
+  };
+}
+
+function delay(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function fetchWithRetry<T>(
+  fn: () => Promise<T>,
+  config: Required<RetryConfig>
+): Promise<T> {
+  let lastError: unknown;
+  for (let attempt = 0; attempt <= config.maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      lastError = err;
+      if (attempt < config.maxRetries) {
+        const waitMs = config.initialDelayMs * Math.pow(config.backoffMultiplier, attempt);
+        await delay(waitMs);
+      }
+    }
+  }
+  throw lastError;
+}
+
 export interface FetchFeedResult {
   items: FeedItem[];
   firmware: FirmwareEntry[];
@@ -45,7 +84,8 @@ export interface FetchFeedResult {
 export async function fetchFeed(
   feedConfig: FeedConfig,
   startDate: Date,
-  endDate: Date
+  endDate: Date,
+  retry?: RetryConfig
 ): Promise<FetchFeedResult> {
   type CustomItem = {
     'content:encoded'?: string;
@@ -59,7 +99,8 @@ export async function fetchFeed(
     timeout: 20000,
   });
 
-  const feed = await parser.parseURL(feedConfig.url);
+  const retryConfig = resolveRetryConfig(retry);
+  const feed = await fetchWithRetry(() => parser.parseURL(feedConfig.url), retryConfig);
 
   const items: FeedItem[] = [];
   const firmware: FirmwareEntry[] = [];

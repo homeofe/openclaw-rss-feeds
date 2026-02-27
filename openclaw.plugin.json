@@ -68,6 +68,34 @@
       "nvdApiKey": {
         "type": "string",
         "description": "NVD API key for higher rate limits (optional, free from nvd.nist.gov)"
+      },
+      "retry": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Retry/backoff configuration for RSS feed fetches",
+        "properties": {
+          "maxRetries": {
+            "type": "integer",
+            "default": 3,
+            "minimum": 0,
+            "maximum": 10,
+            "description": "Maximum number of retry attempts per feed (default: 3)"
+          },
+          "initialDelayMs": {
+            "type": "integer",
+            "default": 1000,
+            "minimum": 100,
+            "maximum": 30000,
+            "description": "Initial delay in milliseconds before first retry (default: 1000)"
+          },
+          "backoffMultiplier": {
+            "type": "number",
+            "default": 2,
+            "minimum": 1,
+            "maximum": 5,
+            "description": "Multiplier applied to delay between each retry attempt (default: 2)"
+          }
+        }
       }
     },
     "required": ["feeds"]

@@ -54,7 +54,7 @@ async function runDigest(api: PluginApi): Promise<DigestResult> {
 
     // Fetch RSS/Atom items
     try {
-      const { items, firmware } = await fetchFeed(feedConfig, startDate, endDate);
+      const { items, firmware } = await fetchFeed(feedConfig, startDate, endDate, config.retry);
       feedResult.items = items;
       feedResult.firmware = firmware;
       api.logger.info(
