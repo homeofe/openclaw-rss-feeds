@@ -60,7 +60,8 @@
     "timestamp": "2026-02-27T15:36:00.000Z",
     "phase": "maintenance",
     "session_id": "t005-integration-test",
-    "duration_minutes": 8
+    "duration_minutes": 8,
+    "commit": "a185258"
   },
   "files": {
     "NEXT_ACTIONS.md": {
