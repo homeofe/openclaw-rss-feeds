@@ -13,7 +13,8 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "prepublishOnly": "npm run build && npm test"
   },
   "keywords": ["openclaw", "openclaw-plugin", "rss", "feeds", "cve", "security", "digest", "ghost"],
   "author": "Elvatis <hello@example.invalid>",
